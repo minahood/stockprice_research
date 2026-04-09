@@ -21,6 +21,7 @@ function defaultStartDate() {
 export default function Page() {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState("");
+  const [tickerInput, setTickerInput] = useState("");
   const [presetGames, setPresetGames] = useState<Game[]>([]);
   const [addedGames, setAddedGames] = useState<AddedGame[]>([]);
   const [startDate, setStartDate] = useState(defaultStartDate());
@@ -28,7 +29,7 @@ export default function Page() {
 
   const [chartData, setChartData] = useState<ChartDataPoint[]>([]);
   const [currency, setCurrency] = useState("JPY");
-  const [ticker, setTicker] = useState("");
+  const [displayTicker, setDisplayTicker] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -49,6 +50,9 @@ export default function Page() {
     setAddedGames([]);
     setChartData([]);
     setError(null);
+    // Auto-fill ticker from selected company
+    const company = companies.find((c) => c.id === id);
+    setTickerInput(company ? company.ticker : "");
   }
 
   function handleAddGame(game: AddedGame) {
@@ -60,9 +64,9 @@ export default function Page() {
   }
 
   async function handleFetch() {
-    const company = companies.find((c) => c.id === selectedCompanyId);
-    if (!company) {
-      setError("会社を選択してください");
+    const ticker = tickerInput.trim();
+    if (!ticker) {
+      setError("銘柄コードを入力してください");
       return;
     }
     if (addedGames.length === 0) {
@@ -75,12 +79,12 @@ export default function Page() {
 
     try {
       const [stockRes, ...trendResults] = await Promise.all([
-        fetchStock(company.ticker, startDate, endDate),
+        fetchStock(ticker, startDate, endDate),
         ...addedGames.map((g) => fetchTrends(g.keyword, startDate, endDate)),
       ]);
 
       setCurrency(stockRes.currency);
-      setTicker(company.ticker);
+      setDisplayTicker(ticker);
 
       const dateMap: Record<string, ChartDataPoint> = {};
 
@@ -104,6 +108,8 @@ export default function Page() {
       setLoading(false);
     }
   }
+
+  const canFetch = !loading && tickerInput.trim().length > 0 && addedGames.length > 0;
 
   return (
     <div style={{ fontFamily: "system-ui, sans-serif", maxWidth: 1200, margin: "0 auto", padding: "24px 16px" }}>
@@ -132,6 +138,31 @@ export default function Page() {
             onChange={handleCompanyChange}
           />
 
+          {/* Ticker input */}
+          <div style={{ marginBottom: 16 }}>
+            <label style={{ display: "block", fontWeight: "bold", marginBottom: 4 }}>
+              銘柄コード
+            </label>
+            <input
+              type="text"
+              value={tickerInput}
+              onChange={(e) => setTickerInput(e.target.value.toUpperCase())}
+              placeholder="例: 7974.T, SONY, AAPL"
+              style={{
+                width: "100%",
+                padding: "6px 8px",
+                fontSize: 14,
+                borderRadius: 4,
+                border: `1px solid ${tickerInput.trim() ? "#2563eb" : "#ccc"}`,
+                boxSizing: "border-box",
+                outline: "none",
+              }}
+            />
+            <p style={{ fontSize: 12, color: "#9ca3af", margin: "4px 0 0" }}>
+              東証は末尾に .T を付けてください
+            </p>
+          </div>
+
           <GameSelector
             presetGames={presetGames}
             addedGames={addedGames}
@@ -148,7 +179,7 @@ export default function Page() {
 
           <button
             onClick={handleFetch}
-            disabled={loading || !selectedCompanyId || addedGames.length === 0}
+            disabled={!canFetch}
             style={{
               width: "100%",
               padding: "10px",
@@ -156,9 +187,9 @@ export default function Page() {
               fontWeight: "bold",
               borderRadius: 6,
               border: "none",
-              background: loading ? "#93c5fd" : "#2563eb",
-              color: "#fff",
-              cursor: loading ? "not-allowed" : "pointer",
+              background: loading ? "#93c5fd" : canFetch ? "#2563eb" : "#d1d5db",
+              color: canFetch || loading ? "#fff" : "#9ca3af",
+              cursor: canFetch ? "pointer" : "not-allowed",
               transition: "background 0.2s",
             }}
           >
@@ -196,13 +227,13 @@ export default function Page() {
               data={chartData}
               addedGames={addedGames}
               currency={currency}
-              ticker={ticker}
+              ticker={displayTicker}
             />
           </div>
 
           {chartData.length > 0 && (
             <p style={{ marginTop: 8, fontSize: 12, color: "#9ca3af" }}>
-              ※ 株価は週次（週初め）、検索トレンドはGoogleが提供する相対指数（0〜100）です
+              ※ 株価は週次、検索トレンドはGoogleが提供する相対指数（0〜100）です
             </p>
           )}
         </div>
