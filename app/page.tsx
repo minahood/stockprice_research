@@ -1,12 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { fetchCompanies, fetchGames, fetchStock, fetchTrends } from "@/lib/api-client";
+import { fetchCompanies, fetchGames, fetchStock, fetchTrends, fetchTrendsBatch } from "@/lib/api-client";
 import { CompanySelector } from "@/components/CompanySelector";
 import { GameSelector } from "@/components/GameSelector";
 import { DateRangePicker } from "@/components/DateRangePicker";
 import { ComparisonChart } from "@/components/ComparisonChart";
 import type { AddedGame, ChartDataPoint, Company, Game } from "@/types";
+
+// Scale factor: Google Trends 0-100 → estimated weekly searches
+// 100 points ≈ 1,000,000 searches (1M), displayed as "万" units on chart
+const ABSOLUTE_SCALE = 10000;
 
 function defaultEndDate() {
   return new Date().toISOString().slice(0, 10);
@@ -26,6 +30,7 @@ export default function Page() {
   const [addedGames, setAddedGames] = useState<AddedGame[]>([]);
   const [startDate, setStartDate] = useState(defaultStartDate());
   const [endDate, setEndDate] = useState(defaultEndDate());
+  const [trendMode, setTrendMode] = useState<"relative" | "absolute">("relative");
 
   const [chartData, setChartData] = useState<ChartDataPoint[]>([]);
   const [currency, setCurrency] = useState("JPY");
@@ -50,7 +55,6 @@ export default function Page() {
     setAddedGames([]);
     setChartData([]);
     setError(null);
-    // Auto-fill ticker from selected company
     const company = companies.find((c) => c.id === id);
     setTickerInput(company ? company.ticker : "");
   }
@@ -78,27 +82,47 @@ export default function Page() {
     setError(null);
 
     try {
-      const [stockRes, ...trendResults] = await Promise.all([
-        fetchStock(ticker, startDate, endDate),
-        ...addedGames.map((g) => fetchTrends(g.keyword, startDate, endDate)),
-      ]);
-
-      setCurrency(stockRes.currency);
-      setDisplayTicker(ticker);
-
       const dateMap: Record<string, ChartDataPoint> = {};
 
-      for (const point of stockRes.data) {
-        dateMap[point.date] = { date: point.date, close: point.close };
-      }
+      if (trendMode === "relative") {
+        // Individual queries (each keyword independently normalized to 0-100)
+        const [stockRes, ...trendResults] = await Promise.all([
+          fetchStock(ticker, startDate, endDate),
+          ...addedGames.map((g) => fetchTrends(g.keyword, startDate, endDate)),
+        ]);
+        setCurrency(stockRes.currency);
+        setDisplayTicker(ticker);
 
-      trendResults.forEach((trendRes, i) => {
-        const keyword = addedGames[i].keyword;
-        for (const point of trendRes.data) {
-          if (!dateMap[point.date]) dateMap[point.date] = { date: point.date };
-          dateMap[point.date][`trend_${keyword}`] = point.interest;
+        for (const point of stockRes.data) {
+          dateMap[point.date] = { date: point.date, close: point.close };
         }
-      });
+        trendResults.forEach((trendRes, i) => {
+          const keyword = addedGames[i].keyword;
+          for (const point of trendRes.data) {
+            if (!dateMap[point.date]) dateMap[point.date] = { date: point.date };
+            dateMap[point.date][`trend_${keyword}`] = point.interest;
+          }
+        });
+      } else {
+        // Batch query (all keywords normalized relative to each other) + scale to estimated count
+        const [stockRes, batchResults] = await Promise.all([
+          fetchStock(ticker, startDate, endDate),
+          fetchTrendsBatch(addedGames.map((g) => g.keyword), startDate, endDate),
+        ]);
+        setCurrency(stockRes.currency);
+        setDisplayTicker(ticker);
+
+        for (const point of stockRes.data) {
+          dateMap[point.date] = { date: point.date, close: point.close };
+        }
+        for (const { keyword, data } of batchResults) {
+          for (const point of data) {
+            if (!dateMap[point.date]) dateMap[point.date] = { date: point.date };
+            // Scale to estimated searches
+            dateMap[point.date][`trend_${keyword}`] = point.interest * ABSOLUTE_SCALE;
+          }
+        }
+      }
 
       const merged = Object.values(dateMap).sort((a, b) => a.date.localeCompare(b.date));
       setChartData(merged);
@@ -170,6 +194,43 @@ export default function Page() {
             onRemove={handleRemoveGame}
           />
 
+          {/* Trend mode toggle */}
+          <div style={{ marginBottom: 16 }}>
+            <label style={{ display: "block", fontWeight: "bold", marginBottom: 6 }}>
+              検索数の表示形式
+            </label>
+            <div style={{ display: "flex", borderRadius: 6, overflow: "hidden", border: "1px solid #d1d5db" }}>
+              {(["relative", "absolute"] as const).map((mode) => {
+                const active = trendMode === mode;
+                return (
+                  <button
+                    key={mode}
+                    onClick={() => setTrendMode(mode)}
+                    style={{
+                      flex: 1,
+                      padding: "6px 4px",
+                      fontSize: 12,
+                      border: "none",
+                      borderRight: mode === "relative" ? "1px solid #d1d5db" : "none",
+                      background: active ? "#2563eb" : "#fff",
+                      color: active ? "#fff" : "#374151",
+                      cursor: "pointer",
+                      fontWeight: active ? "bold" : "normal",
+                      lineHeight: 1.3,
+                    }}
+                  >
+                    {mode === "relative" ? "相対指数\n(0-100)" : "推定検索数\n(万回)"}
+                  </button>
+                );
+              })}
+            </div>
+            {trendMode === "absolute" && (
+              <p style={{ fontSize: 11, color: "#9ca3af", margin: "4px 0 0", lineHeight: 1.4 }}>
+                複数ゲームを相互に比較した推定値です
+              </p>
+            )}
+          </div>
+
           <DateRangePicker
             start={startDate}
             end={endDate}
@@ -228,12 +289,16 @@ export default function Page() {
               addedGames={addedGames}
               currency={currency}
               ticker={displayTicker}
+              trendMode={trendMode}
             />
           </div>
 
           {chartData.length > 0 && (
             <p style={{ marginTop: 8, fontSize: 12, color: "#9ca3af" }}>
-              ※ 株価は週次、検索トレンドはGoogleが提供する相対指数（0〜100）です
+              ※ 株価は週次。
+              {trendMode === "relative"
+                ? "検索トレンドはGoogleが提供する相対指数（各キーワード独立で0〜100）です。"
+                : "推定検索数はGoogle Trendsの相対指数を元にした概算値（万回/週）です。複数ゲームは相互に正規化されています。"}
             </p>
           )}
         </div>

@@ -41,3 +41,21 @@ export async function fetchTrends(
   }
   return res.json();
 }
+
+export async function fetchTrendsBatch(
+  keywords: string[],
+  start: string,
+  end: string
+): Promise<{ keyword: string; data: { date: string; interest: number }[] }[]> {
+  const params = new URLSearchParams({ keywords: keywords.join(","), start, end });
+  const res = await fetch(`${BASE}/trends-batch?${params}`);
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error((err as { detail?: string }).detail ?? "トレンドデータの取得に失敗しました");
+  }
+  const json = await res.json() as {
+    keywords: string[];
+    result: { keyword: string; data: { date: string; interest: number }[] }[];
+  };
+  return json.result;
+}
