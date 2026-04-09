@@ -1,4 +1,4 @@
-import type { Company, Game, StockResponse, TrendResponse } from "../types";
+import type { Company, Game, StockResponse, TrendResponse } from "@/types";
 
 const BASE = "/api";
 
@@ -23,7 +23,7 @@ export async function fetchStock(
   const res = await fetch(`${BASE}/stock?${params}`);
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error(err.detail ?? "株価データの取得に失敗しました");
+    throw new Error((err as { detail?: string }).detail ?? "株価データの取得に失敗しました");
   }
   return res.json();
 }
@@ -37,7 +37,7 @@ export async function fetchTrends(
   const res = await fetch(`${BASE}/trends?${params}`);
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error(err.detail ?? "トレンドデータの取得に失敗しました");
+    throw new Error((err as { detail?: string }).detail ?? "トレンドデータの取得に失敗しました");
   }
   return res.json();
 }

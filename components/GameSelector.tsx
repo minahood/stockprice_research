@@ -1,9 +1,11 @@
+"use client";
+
 import { useState } from "react";
-import type { AddedGame, Game } from "../types";
+import type { AddedGame, Game } from "@/types";
 
 const MAX_GAMES = 5;
 
-const CHIP_COLORS = [
+export const CHIP_COLORS = [
   "#f97316", "#22c55e", "#ef4444", "#a855f7", "#06b6d4",
 ];
 
@@ -126,5 +128,3 @@ export function GameSelector({ presetGames, addedGames, onAdd, onRemove }: Props
     </div>
   );
 }
-
-export { CHIP_COLORS };

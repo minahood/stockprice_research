@@ -1,3 +1,5 @@
+"use client";
+
 import {
   ComposedChart,
   Line,
@@ -8,7 +10,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-import type { ChartDataPoint, AddedGame } from "../types";
+import type { ChartDataPoint, AddedGame } from "@/types";
 import { CHIP_COLORS } from "./GameSelector";
 
 const STOCK_COLOR = "#2563eb";

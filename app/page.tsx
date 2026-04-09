@@ -1,10 +1,12 @@
+"use client";
+
 import { useEffect, useState } from "react";
-import { fetchCompanies, fetchGames, fetchStock, fetchTrends } from "./api/client";
-import { CompanySelector } from "./components/CompanySelector";
-import { GameSelector } from "./components/GameSelector";
-import { DateRangePicker } from "./components/DateRangePicker";
-import { ComparisonChart } from "./components/ComparisonChart";
-import type { AddedGame, ChartDataPoint, Company, Game } from "./types";
+import { fetchCompanies, fetchGames, fetchStock, fetchTrends } from "@/lib/api-client";
+import { CompanySelector } from "@/components/CompanySelector";
+import { GameSelector } from "@/components/GameSelector";
+import { DateRangePicker } from "@/components/DateRangePicker";
+import { ComparisonChart } from "@/components/ComparisonChart";
+import type { AddedGame, ChartDataPoint, Company, Game } from "@/types";
 
 function defaultEndDate() {
   return new Date().toISOString().slice(0, 10);
@@ -16,7 +18,7 @@ function defaultStartDate() {
   return d.toISOString().slice(0, 10);
 }
 
-export default function App() {
+export default function Page() {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState("");
   const [presetGames, setPresetGames] = useState<Game[]>([]);
@@ -30,12 +32,10 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Load companies on mount
   useEffect(() => {
     fetchCompanies().then(setCompanies).catch(() => setError("会社一覧の取得に失敗しました"));
   }, []);
 
-  // Load preset games when company changes
   useEffect(() => {
     if (!selectedCompanyId) {
       setPresetGames([]);
@@ -74,7 +74,6 @@ export default function App() {
     setError(null);
 
     try {
-      // Fetch stock + all trends in parallel
       const [stockRes, ...trendResults] = await Promise.all([
         fetchStock(company.ticker, startDate, endDate),
         ...addedGames.map((g) => fetchTrends(g.keyword, startDate, endDate)),
@@ -83,7 +82,6 @@ export default function App() {
       setCurrency(stockRes.currency);
       setTicker(company.ticker);
 
-      // Build a unified date map
       const dateMap: Record<string, ChartDataPoint> = {};
 
       for (const point of stockRes.data) {
@@ -204,7 +202,7 @@ export default function App() {
 
           {chartData.length > 0 && (
             <p style={{ marginTop: 8, fontSize: 12, color: "#9ca3af" }}>
-              ※ 株価は週次（金曜終値）、検索トレンドはGoogleが提供する相対指数（0〜100）です
+              ※ 株価は週次（週初め）、検索トレンドはGoogleが提供する相対指数（0〜100）です
             </p>
           )}
         </div>
