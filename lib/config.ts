@@ -67,6 +67,42 @@ export const COMPANIES: CompanyEntry[] = [
       { id: "efootball", name: "eFootball", keyword: "eFootball" },
     ],
   },
+  {
+    id: "cyberagent",
+    name: "サイバーエージェント",
+    ticker: "4751.T",
+    games: [
+      { id: "umamusume", name: "ウマ娘 プリティーダービー", keyword: "ウマ娘 プリティーダービー" },
+      { id: "granblue", name: "グランブルーファンタジー", keyword: "グランブルーファンタジー" },
+      { id: "shadowverse", name: "シャドウバース", keyword: "シャドウバース" },
+      { id: "princess_connect", name: "プリンセスコネクト", keyword: "プリンセスコネクト Re:Dive" },
+      { id: "world_flipper", name: "ワールドフリッパー", keyword: "ワールドフリッパー" },
+    ],
+  },
+  {
+    id: "dena",
+    name: "DeNA",
+    ticker: "2432.T",
+    games: [
+      { id: "othellonia", name: "逆転オセロニア", keyword: "逆転オセロニア" },
+      { id: "pokemon_masters", name: "ポケモンマスターズEX", keyword: "ポケモンマスターズ" },
+      { id: "fe_heroes", name: "ファイアーエムブレムヒーローズ", keyword: "ファイアーエムブレムヒーローズ" },
+      { id: "hachinaicg", name: "八月のシンデレラナイン", keyword: "八月のシンデレラナイン" },
+      { id: "baseball_superstars", name: "プロ野球 PRIDE", keyword: "プロ野球 PRIDE DeNA" },
+    ],
+  },
+  {
+    id: "koei_tecmo",
+    name: "コーエーテクモHD",
+    ticker: "3635.T",
+    games: [
+      { id: "nioh", name: "仁王", keyword: "仁王 ゲーム" },
+      { id: "sangokushi", name: "三國志", keyword: "三國志 コーエー" },
+      { id: "nobunaga", name: "信長の野望", keyword: "信長の野望" },
+      { id: "musou", name: "真・三國無双", keyword: "真・三國無双" },
+      { id: "doa", name: "Dead or Alive", keyword: "Dead or Alive game" },
+    ],
+  },
 ];
 
 export const COMPANY_MAP: Record<string, CompanyEntry> = Object.fromEntries(
