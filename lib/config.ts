@@ -18,10 +18,10 @@ export const COMPANIES: CompanyEntry[] = [
     ticker: "7974.T",
     games: [
       { id: "mario", name: "マリオ", keyword: "マリオ" },
-      { id: "zelda", name: "ゼルダの伝説", keyword: "ゼルダの伝説" },
+      { id: "zelda", name: "ゼルダ", keyword: "ゼルダの伝説" },
       { id: "pokemon", name: "ポケモン", keyword: "ポケモン" },
-      { id: "animal_crossing", name: "どうぶつの森", keyword: "どうぶつの森" },
-      { id: "splatoon", name: "スプラトゥーン", keyword: "スプラトゥーン" },
+      { id: "animal_crossing", name: "どう森", keyword: "どうぶつの森" },
+      { id: "splatoon", name: "スプラ", keyword: "スプラトゥーン" },
     ],
   },
   {
@@ -29,10 +29,10 @@ export const COMPANIES: CompanyEntry[] = [
     name: "ソニー",
     ticker: "6758.T",
     games: [
-      { id: "god_of_war", name: "God of War", keyword: "God of War" },
-      { id: "spiderman", name: "Marvel's Spider-Man", keyword: "Marvel Spider-Man game" },
+      { id: "god_of_war", name: "GoW", keyword: "God of War" },
+      { id: "spiderman", name: "スパイダーマン", keyword: "Marvel Spider-Man game" },
       { id: "horizon", name: "Horizon", keyword: "Horizon Forbidden West" },
-      { id: "gran_turismo", name: "Gran Turismo", keyword: "Gran Turismo" },
+      { id: "gran_turismo", name: "GT", keyword: "Gran Turismo" },
     ],
   },
   {
@@ -40,10 +40,10 @@ export const COMPANIES: CompanyEntry[] = [
     name: "カプコン",
     ticker: "9697.T",
     games: [
-      { id: "monster_hunter", name: "モンスターハンター", keyword: "モンスターハンター" },
-      { id: "biohazard", name: "バイオハザード", keyword: "バイオハザード" },
-      { id: "street_fighter", name: "ストリートファイター", keyword: "ストリートファイター" },
-      { id: "ace_attorney", name: "逆転裁判", keyword: "逆転裁判" },
+      { id: "monster_hunter", name: "モンハン", keyword: "モンスターハンター" },
+      { id: "biohazard", name: "バイオ", keyword: "バイオハザード" },
+      { id: "street_fighter", name: "ストファイ", keyword: "ストリートファイター" },
+      { id: "ace_attorney", name: "逆裁", keyword: "逆転裁判" },
     ],
   },
   {
@@ -51,9 +51,9 @@ export const COMPANIES: CompanyEntry[] = [
     name: "スクウェア・エニックス",
     ticker: "9684.T",
     games: [
-      { id: "final_fantasy", name: "ファイナルファンタジー", keyword: "ファイナルファンタジー" },
-      { id: "dragon_quest", name: "ドラゴンクエスト", keyword: "ドラゴンクエスト" },
-      { id: "kingdom_hearts", name: "キングダムハーツ", keyword: "キングダムハーツ" },
+      { id: "final_fantasy", name: "FF", keyword: "ファイナルファンタジー" },
+      { id: "dragon_quest", name: "ドラクエ", keyword: "ドラゴンクエスト" },
+      { id: "kingdom_hearts", name: "KH", keyword: "キングダムハーツ" },
     ],
   },
   {
@@ -61,9 +61,9 @@ export const COMPANIES: CompanyEntry[] = [
     name: "コナミ",
     ticker: "9766.T",
     games: [
-      { id: "pro_baseball", name: "プロ野球スピリッツ", keyword: "プロ野球スピリッツ" },
+      { id: "pro_baseball", name: "スピリッツ", keyword: "プロ野球スピリッツ" },
       { id: "yugioh", name: "遊戯王", keyword: "遊戯王" },
-      { id: "metal_gear", name: "メタルギア", keyword: "メタルギア" },
+      { id: "metal_gear", name: "MGS", keyword: "メタルギア" },
       { id: "efootball", name: "eFootball", keyword: "eFootball" },
     ],
   },
@@ -72,11 +72,11 @@ export const COMPANIES: CompanyEntry[] = [
     name: "サイバーエージェント",
     ticker: "4751.T",
     games: [
-      { id: "umamusume", name: "ウマ娘 プリティーダービー", keyword: "ウマ娘 プリティーダービー" },
-      { id: "granblue", name: "グランブルーファンタジー", keyword: "グランブルーファンタジー" },
-      { id: "shadowverse", name: "シャドウバース", keyword: "シャドウバース" },
-      { id: "princess_connect", name: "プリンセスコネクト", keyword: "プリンセスコネクト Re:Dive" },
-      { id: "world_flipper", name: "ワールドフリッパー", keyword: "ワールドフリッパー" },
+      { id: "umamusume", name: "ウマ娘", keyword: "ウマ娘 プリティーダービー" },
+      { id: "granblue", name: "グラブル", keyword: "グランブルーファンタジー" },
+      { id: "shadowverse", name: "シャドバ", keyword: "シャドウバース" },
+      { id: "princess_connect", name: "プリコネ", keyword: "プリンセスコネクト Re:Dive" },
+      { id: "world_flipper", name: "ワーフリ", keyword: "ワールドフリッパー" },
     ],
   },
   {
@@ -84,11 +84,11 @@ export const COMPANIES: CompanyEntry[] = [
     name: "DeNA",
     ticker: "2432.T",
     games: [
-      { id: "othellonia", name: "逆転オセロニア", keyword: "逆転オセロニア" },
-      { id: "pokemon_masters", name: "ポケモンマスターズEX", keyword: "ポケモンマスターズ" },
-      { id: "fe_heroes", name: "ファイアーエムブレムヒーローズ", keyword: "ファイアーエムブレムヒーローズ" },
-      { id: "hachinaicg", name: "八月のシンデレラナイン", keyword: "八月のシンデレラナイン" },
-      { id: "baseball_superstars", name: "プロ野球 PRIDE", keyword: "プロ野球 PRIDE DeNA" },
+      { id: "othellonia", name: "オセロニア", keyword: "逆転オセロニア" },
+      { id: "pokemon_masters", name: "ポケマス", keyword: "ポケモンマスターズ" },
+      { id: "fe_heroes", name: "FEH", keyword: "ファイアーエムブレムヒーローズ" },
+      { id: "hachinaicg", name: "ハチナイ", keyword: "八月のシンデレラナイン" },
+      { id: "baseball_superstars", name: "プロ野球PRIDE", keyword: "プロ野球 PRIDE DeNA" },
     ],
   },
   {
@@ -98,9 +98,9 @@ export const COMPANIES: CompanyEntry[] = [
     games: [
       { id: "nioh", name: "仁王", keyword: "仁王 ゲーム" },
       { id: "sangokushi", name: "三國志", keyword: "三國志 コーエー" },
-      { id: "nobunaga", name: "信長の野望", keyword: "信長の野望" },
-      { id: "musou", name: "真・三國無双", keyword: "真・三國無双" },
-      { id: "doa", name: "Dead or Alive", keyword: "Dead or Alive game" },
+      { id: "nobunaga", name: "信長", keyword: "信長の野望" },
+      { id: "musou", name: "無双", keyword: "真・三國無双" },
+      { id: "doa", name: "DoA", keyword: "Dead or Alive game" },
     ],
   },
 ];
