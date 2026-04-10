@@ -31,11 +31,7 @@ interface TooltipPayload {
 }
 
 function formatTrendTooltip(v: number, mode: "relative" | "absolute"): string {
-  if (mode === "absolute") {
-    if (v >= 10000) return `約${Math.round(v / 10000)}万回/週`;
-    if (v >= 1000) return `約${Math.round(v / 1000)}千回/週`;
-    return `${v}回/週`;
-  }
+  if (mode === "absolute") return `${v}（比較値）`;
   return String(v);
 }
 
@@ -106,15 +102,7 @@ export function ComparisonChart({ data, addedGames, currency, ticker, trendMode 
   const trendLabel =
     trendMode === "relative"
       ? "検索トレンド (個別 0-100)"
-      : "推定検索数 (万回/週)";
-
-  function trendTickFormatter(v: number): string {
-    if (trendMode === "absolute") {
-      if (v >= 10000) return `${Math.round(v / 10000)}万`;
-      if (v >= 1000) return `${Math.round(v / 1000)}千`;
-    }
-    return String(v);
-  }
+      : "検索ボリューム比較 (0-100)";
 
   return (
     <ResponsiveContainer width="100%" height={450}>
@@ -134,12 +122,11 @@ export function ComparisonChart({ data, addedGames, currency, ticker, trendMode 
           tick={{ fontSize: 11 }}
           label={{ value: `株価 (${currency})`, angle: -90, position: "insideLeft", offset: 10, style: { fontSize: 11 } }}
         />
-        {/* Right axis: trend (relative 0-100 or estimated search count) */}
+        {/* Right axis: trend (relative 0-100 or absolute estimated count) */}
         <YAxis
           yAxisId="trend"
           orientation="right"
           domain={trendDomain}
-          tickFormatter={trendTickFormatter}
           tick={{ fontSize: 11 }}
           label={{ value: trendLabel, angle: 90, position: "insideRight", offset: 15, style: { fontSize: 11 } }}
         />

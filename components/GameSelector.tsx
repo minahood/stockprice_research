@@ -3,7 +3,7 @@
 import { useState } from "react";
 import type { AddedGame, Game } from "@/types";
 
-const MAX_GAMES = 4;
+const MAX_GAMES = 5;
 
 export const CHIP_COLORS = [
   "#f97316", "#22c55e", "#ef4444", "#a855f7", "#06b6d4",

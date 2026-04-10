@@ -100,16 +100,10 @@ export default function Page() {
           }
         });
       } else {
-        // Batch query with YouTube as hidden reference keyword for calibration.
-        // YouTube JP weekly search volume ≈ 3,000,000. We include it so all keywords
-        // are normalized on the same scale, then derive: estimated = (game / youtube) × 3,000,000.
-        const REFERENCE_KEYWORD = "YouTube";
-        const REFERENCE_WEEKLY_JP = 3_000_000;
-
-        const batchKeywords = [...addedGames.map((g) => g.keyword), REFERENCE_KEYWORD];
+        // Batch query (all keywords normalized relative to each other) + scale to estimated count
         const [stockRes, batchResults] = await Promise.all([
           fetchStock(ticker, startDate, endDate),
-          fetchTrendsBatch(batchKeywords, startDate, endDate),
+          fetchTrendsBatch(addedGames.map((g) => g.keyword), startDate, endDate),
         ]);
         setCurrency(stockRes.currency);
         setDisplayTicker(ticker);
@@ -117,23 +111,10 @@ export default function Page() {
         for (const point of stockRes.data) {
           dateMap[point.date] = { date: point.date, close: point.close };
         }
-
-        // Build a date → YouTube index map for calibration
-        const refResult = batchResults.find((r) => r.keyword === REFERENCE_KEYWORD);
-        const refMap: Record<string, number> = {};
-        refResult?.data.forEach((p) => { refMap[p.date] = p.interest; });
-
-        // Apply calibration to game keywords only (exclude YouTube from chart)
-        const gameResults = batchResults.filter((r) => r.keyword !== REFERENCE_KEYWORD);
-        for (const { keyword, data } of gameResults) {
+        for (const { keyword, data } of batchResults) {
           for (const point of data) {
             if (!dateMap[point.date]) dateMap[point.date] = { date: point.date };
-            const refVal = refMap[point.date] ?? 0;
-            if (refVal > 0) {
-              dateMap[point.date][`trend_${keyword}`] = Math.round(
-                (point.interest / refVal) * REFERENCE_WEEKLY_JP
-              );
-            }
+            dateMap[point.date][`trend_${keyword}`] = point.interest;
           }
         }
       }
@@ -233,14 +214,14 @@ export default function Page() {
                       lineHeight: 1.3,
                     }}
                   >
-                    {mode === "relative" ? "個別指数\n(0-100)" : "推定検索数\n(万回/週)"}
+                    {mode === "relative" ? "個別指数\n(0-100)" : "ボリューム比較\n(0-100)"}
                   </button>
                 );
               })}
             </div>
             {trendMode === "absolute" && (
               <p style={{ fontSize: 11, color: "#9ca3af", margin: "4px 0 0", lineHeight: 1.4 }}>
-                YouTubeをリファレンスに推定週次検索数を算出。キーワード間の差を実数で比較
+                全キーワードを同一スケールで比較。最も多い点を100として正規化
               </p>
             )}
           </div>
@@ -312,7 +293,7 @@ export default function Page() {
               ※ 株価は週次。
               {trendMode === "relative"
                 ? "検索トレンドはGoogleが提供する相対指数（各キーワード独立で0〜100）です。"
-                : "YouTubeをリファレンスに校正した推定週次検索数（日本）です。実際の数値とは異なる場合があります。"}
+                : "ボリューム比較は全キーワードを一括クエリし同一スケールで表示（最大値=100）。キーワード間の相対的な人気差が分かります。"}
             </p>
           )}
         </div>
