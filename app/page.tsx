@@ -8,10 +8,6 @@ import { DateRangePicker } from "@/components/DateRangePicker";
 import { ComparisonChart } from "@/components/ComparisonChart";
 import type { AddedGame, ChartDataPoint, Company, Game } from "@/types";
 
-// Scale factor: Google Trends 0-100 → estimated weekly searches
-// 100 points ≈ 1,000,000 searches (1M), displayed as "万" units on chart
-const ABSOLUTE_SCALE = 10000;
-
 function defaultEndDate() {
   return new Date().toISOString().slice(0, 10);
 }
@@ -118,8 +114,7 @@ export default function Page() {
         for (const { keyword, data } of batchResults) {
           for (const point of data) {
             if (!dateMap[point.date]) dateMap[point.date] = { date: point.date };
-            // Scale to estimated searches
-            dateMap[point.date][`trend_${keyword}`] = point.interest * ABSOLUTE_SCALE;
+            dateMap[point.date][`trend_${keyword}`] = point.interest;
           }
         }
       }
@@ -219,14 +214,14 @@ export default function Page() {
                       lineHeight: 1.3,
                     }}
                   >
-                    {mode === "relative" ? "相対指数\n(0-100)" : "推定検索数\n(万回)"}
+                    {mode === "relative" ? "個別指数\n(0-100)" : "ボリューム比較\n(0-100)"}
                   </button>
                 );
               })}
             </div>
             {trendMode === "absolute" && (
               <p style={{ fontSize: 11, color: "#9ca3af", margin: "4px 0 0", lineHeight: 1.4 }}>
-                複数ゲームを相互に比較した推定値です
+                全キーワードを同一スケールで比較。最も多い点を100として正規化
               </p>
             )}
           </div>
@@ -298,7 +293,7 @@ export default function Page() {
               ※ 株価は週次。
               {trendMode === "relative"
                 ? "検索トレンドはGoogleが提供する相対指数（各キーワード独立で0〜100）です。"
-                : "推定検索数はGoogle Trendsの相対指数を元にした概算値（万回/週）です。複数ゲームは相互に正規化されています。"}
+                : "ボリューム比較は全キーワードを一括クエリし同一スケールで表示（最大値=100）。キーワード間の相対的な人気差が分かります。"}
             </p>
           )}
         </div>

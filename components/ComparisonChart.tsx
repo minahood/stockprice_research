@@ -30,20 +30,8 @@ interface TooltipPayload {
   color: string;
 }
 
-function formatTrendTick(v: number, mode: "relative" | "absolute"): string {
-  if (mode === "absolute") {
-    if (v >= 10000) return `${(v / 10000).toFixed(0)}万`;
-    if (v >= 1000) return `${(v / 1000).toFixed(0)}千`;
-    return String(v);
-  }
-  return String(v);
-}
-
 function formatTrendTooltip(v: number, mode: "relative" | "absolute"): string {
-  if (mode === "absolute") {
-    if (v >= 10000) return `約${(v / 10000).toFixed(1)}万回`;
-    return `約${v.toLocaleString()}回`;
-  }
+  if (mode === "absolute") return `${v}（比較値）`;
   return String(v);
 }
 
@@ -87,9 +75,8 @@ function CustomTooltip({
 }
 
 export function ComparisonChart({ data, addedGames, currency, ticker, trendMode }: Props) {
-  // Calculate actual max from data to avoid Recharts "auto" misreporting with null-heavy datasets
+  // Calculate actual max from data so the axis fits the data, not a fixed ceiling
   const trendMax = useMemo(() => {
-    if (trendMode === "relative") return 100;
     let max = 0;
     for (const point of data) {
       for (const game of addedGames) {
@@ -97,11 +84,10 @@ export function ComparisonChart({ data, addedGames, currency, ticker, trendMode 
         if (typeof v === "number" && v > max) max = v;
       }
     }
-    if (max === 0) return 1000000;
-    // Round up to the nearest power-of-10 magnitude for clean axis ticks
-    const magnitude = Math.pow(10, Math.floor(Math.log10(max)));
-    return Math.ceil(max / magnitude) * magnitude;
-  }, [data, addedGames, trendMode]);
+    if (max === 0) return 100;
+    // Round up to a clean number (next multiple of 10 or 20)
+    return Math.ceil(max / 10) * 10;
+  }, [data, addedGames]);
 
   if (data.length === 0) {
     return (
@@ -115,8 +101,8 @@ export function ComparisonChart({ data, addedGames, currency, ticker, trendMode 
 
   const trendLabel =
     trendMode === "relative"
-      ? "検索トレンド (0-100)"
-      : "推定検索数 (万回/週)";
+      ? "検索トレンド (個別 0-100)"
+      : "検索ボリューム比較 (0-100)";
 
   return (
     <ResponsiveContainer width="100%" height={450}>
@@ -141,7 +127,6 @@ export function ComparisonChart({ data, addedGames, currency, ticker, trendMode 
           yAxisId="trend"
           orientation="right"
           domain={trendDomain}
-          tickFormatter={(v: number) => formatTrendTick(v, trendMode)}
           tick={{ fontSize: 11 }}
           label={{ value: trendLabel, angle: 90, position: "insideRight", offset: 15, style: { fontSize: 11 } }}
         />
