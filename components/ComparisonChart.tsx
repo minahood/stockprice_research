@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import {
   ComposedChart,
   Line,
@@ -86,6 +87,22 @@ function CustomTooltip({
 }
 
 export function ComparisonChart({ data, addedGames, currency, ticker, trendMode }: Props) {
+  // Calculate actual max from data to avoid Recharts "auto" misreporting with null-heavy datasets
+  const trendMax = useMemo(() => {
+    if (trendMode === "relative") return 100;
+    let max = 0;
+    for (const point of data) {
+      for (const game of addedGames) {
+        const v = point[`trend_${game.keyword}`];
+        if (typeof v === "number" && v > max) max = v;
+      }
+    }
+    if (max === 0) return 1000000;
+    // Round up to the nearest power-of-10 magnitude for clean axis ticks
+    const magnitude = Math.pow(10, Math.floor(Math.log10(max)));
+    return Math.ceil(max / magnitude) * magnitude;
+  }, [data, addedGames, trendMode]);
+
   if (data.length === 0) {
     return (
       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: 400, color: "#9ca3af" }}>
@@ -94,9 +111,7 @@ export function ComparisonChart({ data, addedGames, currency, ticker, trendMode 
     );
   }
 
-  // In absolute mode: Y-axis domain auto-scales to the data max
-  const trendDomain: [number | string, number | string] =
-    trendMode === "relative" ? [0, 100] : [0, "auto"];
+  const trendDomain: [number, number] = [0, trendMax];
 
   const trendLabel =
     trendMode === "relative"
